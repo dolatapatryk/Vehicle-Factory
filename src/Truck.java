@@ -1,13 +1,14 @@
-import java.util.concurrent.TimeUnit;
-
+/**
+ * Truck class
+ * @author Patryk
+ *
+ */
 public class Truck extends Vehicle implements Runnable {
 
-	
 	public Truck() {
 		this.setTime(15);
 		this.setPrice(2000);
 	}
-
 
 	@Override
 	public void run() {

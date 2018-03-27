@@ -1,5 +1,8 @@
-import java.util.concurrent.TimeUnit;
-
+/**
+ * Motorcycle class
+ * @author Patryk
+ *
+ */
 public class Motorcycle extends Vehicle implements Runnable {
 	
 	

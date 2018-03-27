@@ -1,6 +1,10 @@
 import java.util.concurrent.TimeUnit;
-
-public abstract class Vehicle {
+/**
+ * Vehicle superclass
+ * @author Patryk
+ *
+ */
+public abstract class Vehicle{
 	
 	private int time;
 	private int price;
@@ -13,6 +17,7 @@ public abstract class Vehicle {
 			System.out.println(e.getMessage());
 		}
 		System.out.println(this.toString()+" is done");
+		Factory.addFinishedThreads();	
 	}
 	
 	

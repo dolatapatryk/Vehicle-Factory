@@ -1,7 +1,9 @@
-import java.util.concurrent.TimeUnit;
-
+/**
+ * Car class
+ * @author Patryk
+ *
+ */
 public class Car extends Vehicle implements Runnable{
-	
 	
 	public Car() {
 		this.setTime(10);

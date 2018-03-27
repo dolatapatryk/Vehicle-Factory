@@ -1,11 +1,13 @@
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,29 +25,35 @@ import org.w3c.dom.NodeList;
 public class Factory {
 	private int value;
 	private LinkedList<Vehicle> listOfVehicles;
+	private static volatile int finishedThreads = 0;
 	
 	public Factory() {
 		this.value = 0;
 		this.listOfVehicles = new LinkedList<>();
 	}
 	
-	public String loadOrderFromUser() {
+	public void loadOrderFromUser() {
 		System.out.print("Your order: ");
 		Scanner scanner = new Scanner(System.in);
 		String temp = null;
 		StringBuilder order = new StringBuilder();
 		while(true) {
 			temp=scanner.nextLine();
-			if(temp.equals("</order>")) {
+			if(temp.equals("</order>")) { //dopoki uzytkownik nie wprowadzi </order> to czekamy na jego input
 				order.append(temp+"\n");
 				break;
 			}else {
 				order.append(temp+"\n");
 			}
 		}
-		scanner.close();
 		
-		return order.toString();
+		try {
+			saveAsXML(order.toString()); //przesylamy input uzytkownika do metody saveAsXML, zeby stworzyla z niego plik xml
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void saveAsXML(String text) throws IOException {
@@ -56,31 +64,24 @@ public class Factory {
 		output.close();
 	}
 	
-	public void loadFromXML() {
+	public void loadFromXML() { //parsujemy nasz plik xml zeby wyciagnac z niego typy pojazdow do zbudowania
 		try {
+			 Vehicle v = null;
 	         File inputFile = new File("order.xml");
 	         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 	         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 	         Document doc = dBuilder.parse(inputFile);
 	         doc.getDocumentElement().normalize();
-	         System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+	        
 	         NodeList nList = doc.getElementsByTagName("item");
-	         System.out.println("----------------------------");
 	         
 	         for (int temp = 0; temp < nList.getLength(); temp++) {
 	            Node nNode = nList.item(temp);
-	            System.out.println("\nCurrent Element :" + nNode.getNodeName());
 	            
 	            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 	               Element eElement = (Element) nNode;
-	               System.out.println("type of vehicle : " 
-	                  + eElement.getAttribute("type"));
-	               if(eElement.getAttribute("type").equals("car")) {
-	            	   listOfVehicles.add(new Car());
-	               }else if(eElement.getAttribute("type").equals("motorcycle")) {
-	            	   listOfVehicles.add(new Motorcycle());
-	               }else if(eElement.getAttribute("type").equals("truck")) {
-	            	   listOfVehicles.add(new Truck());
+	               if((v = createVehicle(eElement.getAttribute("type"))) != null) { //przesylamy typ pojazdu do metody createVehicle()
+	            	   listOfVehicles.add(v);
 	               }
 	            }
 	         }
@@ -90,16 +91,25 @@ public class Factory {
 	   }
 	
 	public void doOrder() {
-		Thread[] tab = new Thread[listOfVehicles.size()];
+		Thread[] tab = new Thread[listOfVehicles.size()]; //tablica watkow produkujacych pojazdy
+		finishedThreads = 0;
 		for(int i=0;i<listOfVehicles.size();i++) {
 			tab[i] = new Thread((Runnable) listOfVehicles.get(i));
 			tab[i].start();
 		}
+		while(true) {
+			if(finishedThreads==tab.length) {	//czekamy az wszystkie watki sie zakoncza, zeby wypisac total value
+				System.out.println("All vehicles are done");
+				break;
+			}
+		}
+		System.out.println("Total value: "+ calculateValue());
+		listOfVehicles.clear();
+		finishedThreads = 0;
+		
 	}
 	
 	public int calculateValue() {
-		int temp = 0;
-		while(temp<)
 		this.value = 0;
 		for(int i=0;i<listOfVehicles.size();i++) {
 			this.value += listOfVehicles.get(i).getPrice();
@@ -108,6 +118,18 @@ public class Factory {
 		return this.value;
 	}
 	
+	public Vehicle createVehicle(String type) { //w zaleznosci od typu wpisanego przez uzytkownika tworzymy konkretny rodzaj pojazdu
+            if(type.equals("car")) {
+         	   return new Car();
+            }else if(type.equals("motorcycle")) {
+         	   return new Motorcycle();
+            }else if(type.equals("truck")) {
+         	   return new Truck();
+            }else {
+         	   System.out.println("Invalid type of vehicle");
+         	   return null;
+            }   
+	}
 
 	public int getValue() {
 		return value;
@@ -123,5 +145,16 @@ public class Factory {
 
 	public void setListOfVehicles(LinkedList<Vehicle> listOfVehicles) {
 		this.listOfVehicles = listOfVehicles;
+	}
+
+	public static int getFinishedThreads() {
+		return finishedThreads;
+	}
+
+	public static void setFinishedThreads(int finishedThreads) {
+		Factory.finishedThreads = finishedThreads;
+	}
+	public static void addFinishedThreads() {
+		Factory.finishedThreads++;
 	}
 }
