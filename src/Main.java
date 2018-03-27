@@ -28,7 +28,6 @@ public class Main {
 			break;
 		}else {
 		factory.loadOrderFromUser();
-		factory.loadFromXML();
 		factory.doOrder();
 		}
 		}

@@ -53,6 +53,7 @@ public class Factory {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		loadFromXML();
 		
 	}
 	
