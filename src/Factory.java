@@ -100,8 +100,12 @@ public class Factory {
 		}
 		while(true) {
 			if(finishedThreads==tab.length) {	//czekamy az wszystkie watki sie zakoncza, zeby wypisac total value
+				if(finishedThreads==0) {	//nie wypisujemy "all vehicles are done" kiedy sa podane bledne dane wejsciowe
+					break;
+				}else {
 				System.out.println("All vehicles are done");
 				break;
+				}
 			}
 		}
 		System.out.println("Total value: "+ calculateValue());
