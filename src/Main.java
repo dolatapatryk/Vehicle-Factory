@@ -1,5 +1,3 @@
-import java.awt.Choice;
-import java.io.IOException;
 import java.util.Scanner;
 
 /**

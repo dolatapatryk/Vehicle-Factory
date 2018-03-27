@@ -1,3 +1,5 @@
 <order>
 <item type="car"/>
+<item type="motorcycle"/>
+<item type="truck"/>
 </order>
